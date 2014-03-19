@@ -1,0 +1,196 @@
+
+
+<div ng-app="YoloAlbum" class="row">
+
+<div class="centered" ng-controller="YoloCtrl">
+
+    <div class="row" ng-show="!searching">
+        <h1>
+            Current Playlist
+            <br class="show-for-small" />
+            <a class="begin-search large button centered" ng-click="begin_search()">
+                <span class="icon-plus"></span>
+                add a song
+            </a>
+        </h1>
+    </div>
+
+    <div class="playlist row" ng-show="!searching">
+        <div class="playlist-song large-6 small-12 columns" ng-repeat="song in playlist | orderBy:predicate:reverse" ng-animate=" 'animate' ">
+
+            <audio id="playlist_preview_{{song.trackId}}" controls="controls" style="display:none;">
+                <source src="{{song.previewUrl}}" type="audio/wav">
+            </audio>
+
+            <img class="artwork large-4 small-2 columns" ng-src="{{song.artworkUrl100}}" />
+            
+            <div class="large-8 small-9 columns">
+                
+                <h4 class="track">{{song.trackName | truncate:50}}</h4>
+                <h5 class="artist">{{song.artistName}}, {{song.collectionName}}</h5> 
+
+                <a id="playlist_{{song.trackId}}" class="small secondary button round" ng-click="preview('playlist', '{{song.trackId}}')">
+                    <span class="icon-play-circle"></span>
+                    preview
+                </a>
+
+                <a class="small secondary button round" ng-click="like_song(song.id)">
+                    <span class="icon-thumbs-up"></span>
+                    like
+                </a>
+
+                {{song.likes}} Likes
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="song-search-wrapper" ng-show="searching">
+
+        <div class="row">
+            <div class="large-12 columns">
+                <h3>Add a new song to the playlist:</h3>
+            </div>
+        </div>
+        
+        <form id="search_form" class="song-search-form" ng-submit="submit_search()" ng-show="within_limits()">
+
+            <div class="row">
+                <div class="large-1 small-2 columns ">
+                    <span class="icon-info-sign"></span>
+                </div>
+                <div class="large-6 small-9 columns ">
+                    <p>
+                        Search for any song. You'll be able to preview the song. Once you hit "add" the song will be in our playlist. You <strong>CANNOT</strong> remove songs - so choose wisely ;)
+                        <br />
+                        Make sure to choose old and new songs!
+                    </p>
+
+                </div>
+                <div class="large-1 columns">
+                </div>
+            </div>
+            <div class="row">
+            
+                <div class="large-4 small-8 columns">
+                    <input ng-model="song_search_query" onkeyup="if(event.keyCode == 13){angular.element(this).scope().submit_search()}" type="text" placeholder="Search for a song" />
+                </div>
+                <div class="large-8 small-4 columns">
+                    <a class="small button round" ng-click="submit_search()">
+                        <span class="icon-search"></span>
+                        Search 
+                        <span class="hide-for-small">iTunes</span>
+                    </a>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="row song-searching-error" ng-show="searching && !within_limits()">
+            
+            <div class="large-1 small-2 columns ">
+                <span class="icon-exclamation-sign"></span>
+            </div>
+            <div class="large-6 small-9 columns ">
+                <p>
+                    <strong>
+                        Sorry, the playlist is already long enough! Feel free to preview the songs and click "like" on the songs you favor. That will bring them closer to the top of the list.
+                    </strong>
+                </p>
+                
+                <p>
+                    <a class="small secondary button round pull-right" ng-click="cancel_search()">
+                        <span class="icon-remove"></span>
+                        back to playlist
+                    </a>
+                </p>
+
+            </div>
+            <div class="large-1 columns">
+            </div>
+
+        </div>
+
+        <div class="row song-searching-header" ng-show="search_results.length > 0">
+            
+            <div class="large-4 small-7 columns">
+                <strong>
+                    Showing Results for 
+                    <em>
+                        {{song_search_query}}
+                    </em>
+                </strong>
+            </div>
+
+            <div class="large-8 small-4 columns">
+                <a class="small secondary button round" ng-click="cancel_search()">
+                    <span class="icon-remove"></span>
+                    close 
+                    <span class="hide-for-small">search</span>
+                </a>
+            </div>
+        </div>
+
+        <ul class="row song-results" ng-show="search_results.length > 0">
+
+            <li class="large-9 columns song-result" ng-repeat="song in search_results">
+
+                <audio id="search_preview_{{song.trackId}}" controls="controls" style="display:none;">
+                    <source src="{{song.previewUrl}}" type="audio/wav">
+                </audio>
+
+                <div class="large-2 small-3 columns">
+                    <img ng-src="{{song.artworkUrl60}}">
+                </div>
+
+                <div class="large-6 small-9 columns">
+                    <a title="preview" ng-click="search_preview($index)">
+                        <span class="track">{{song.trackName}}</span>
+                        <span class="artist">{{song.artistName}} /</span> 
+                        <span class="album">Album: {{song.collectionName}}</span>
+                    </a>
+                </div>
+
+                <div class="large-4 columns hide-for-small">
+                    <a class="small secondary button round" ng-click="add_song($index)">
+                        <span class="icon-plus"></span>
+                        add
+                    </a>
+
+                    <a class="small secondary button round" ng-click="preview('search', '{{song.trackId}}')">
+                        <span class="icon-play-circle"></span>
+                        preview
+                    </a>
+                </div>
+
+                <div class="row show-for-small">
+                    <div class="small-10 columns">
+                        <a class="small secondary button round" ng-click="add_song($index)">
+                            <span class="icon-plus"></span>
+                            add
+                        </a>
+
+                        <a class="small secondary button round" ng-click="search_preview($index)">
+                            <span class="icon-play-circle"></span>
+                            preview
+                        </a>
+                    </div>
+                    <div class="small-1 columns">
+                    <div>
+                </div>
+
+
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+</div>
+
+<script type='text/javascript' src='https://cdn.firebase.com/v0/firebase.js'></script>
+
+<!--
+    <script src="<?php echo base_url('javascripts/angularfire.min.js'); ?>"></script>
+-->
